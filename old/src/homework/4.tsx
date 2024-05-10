@@ -1,46 +1,28 @@
-import React, {
-  createContext,
-  useMemo,
-  useState,
-  useContext,
-  ReactNode,
-  Dispatch,
-  SetStateAction,
-} from "react";
+import React, { createContext, useMemo, useState, useContext } from "react";
 import noop from "lodash/noop";
 
 type MenuIds = "first" | "second" | "last";
 type Menu = { id: MenuIds; title: string };
 
-type MenuSelected = {
-  selectedMenu: Menu | Record<string, never>;
-};
-
-type MenuAction = {
-  onSelectedMenu: Dispatch<SetStateAction<Menu | Record<string, never>>>;
-};
-
 // Додати тип Menu Selected
 
-const MenuSelectedContext = createContext<MenuSelected | undefined>({
+const MenuSelectedContext = createContext<MenuSelected>({
   selectedMenu: {},
 });
 
 // Додайте тип MenuAction
 
-const MenuActionContext = createContext<MenuAction | undefined>({
+const MenuActionContext = createContext<MenuAction>({
   onSelectedMenu: noop,
 });
 
 type PropsProvider = {
-  children: ReactNode; // Додати тип для children
+  children; // Додати тип для children
 };
 
 function MenuProvider({ children }: PropsProvider) {
   // Додати тип для SelectedMenu він повинен містити { id }
-  const [selectedMenu, setSelectedMenu] = useState<
-    Menu | Record<string, never>
-  >({});
+  const [selectedMenu, setSelectedMenu] = useState<SelectedMenu>({});
 
   const menuContextAction = useMemo(
     () => ({
@@ -66,41 +48,17 @@ function MenuProvider({ children }: PropsProvider) {
 }
 
 type PropsMenu = {
-  menus: Menu[]; // Додайте вірний тип для меню
+  menus; // Додайте вірний тип для меню
 };
 
-function useMenuActionContext() {
-  const context = useContext(MenuActionContext);
-  if (context === undefined) {
-    throw new Error(
-      "onSelectedMenu should be used inside a MenuActionContext Provider "
-    );
-  }
-  return context;
-}
-
-function useMenuSelectedContext() {
-  const context = useContext(MenuSelectedContext);
-
-  if (context === undefined) {
-    throw new Error(
-      "selectedMenu should be used inside a MenuSelectedContext Provider "
-    );
-  }
-  return context;
-}
-
 function MenuComponent({ menus }: PropsMenu) {
-  const { onSelectedMenu } = useMenuActionContext();
-  const { selectedMenu } = useMenuSelectedContext();
+  const { onSelectedMenu } = useContext(MenuActionContext);
+  const { selectedMenu } = useContext(MenuSelectedContext);
 
   return (
     <>
       {menus.map((menu) => (
-        <div
-          key={menu.id}
-          onClick={() => onSelectedMenu({ id: menu.id, title: menu.title })}
-        >
+        <div key={menu.id} onClick={() => onSelectedMenu({ id: menu.id })}>
           {menu.title}{" "}
           {selectedMenu.id === menu.id ? "Selected" : "Not selected"}
         </div>

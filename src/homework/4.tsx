@@ -4,20 +4,22 @@ import React, {
   useState,
   useContext,
   ReactNode,
-  Dispatch,
-  SetStateAction,
 } from "react";
 import noop from "lodash/noop";
 
 type MenuIds = "first" | "second" | "last";
 type Menu = { id: MenuIds; title: string };
 
+type SelectedMenu = {
+  id: MenuIds;
+};
+
 type MenuSelected = {
-  selectedMenu: Menu | Record<string, never>;
+  selectedMenu: SelectedMenu | Record<string, never>;
 };
 
 type MenuAction = {
-  onSelectedMenu: Dispatch<SetStateAction<Menu | Record<string, never>>>;
+  onSelectedMenu: (selectedMenu: SelectedMenu) => void;
 };
 
 // Додати тип Menu Selected
@@ -39,12 +41,12 @@ type PropsProvider = {
 function MenuProvider({ children }: PropsProvider) {
   // Додати тип для SelectedMenu він повинен містити { id }
   const [selectedMenu, setSelectedMenu] = useState<
-    Menu | Record<string, never>
+    SelectedMenu | Record<string, never>
   >({});
 
   const menuContextAction = useMemo(
     () => ({
-      onSelectedMenu: setSelectedMenu,
+      onSelectedMenu: (menu: SelectedMenu) => setSelectedMenu(menu),
     }),
     []
   );
@@ -97,10 +99,7 @@ function MenuComponent({ menus }: PropsMenu) {
   return (
     <>
       {menus.map((menu) => (
-        <div
-          key={menu.id}
-          onClick={() => onSelectedMenu({ id: menu.id, title: menu.title })}
-        >
+        <div key={menu.id} onClick={() => onSelectedMenu({ id: menu.id })}>
           {menu.title}{" "}
           {selectedMenu.id === menu.id ? "Selected" : "Not selected"}
         </div>
